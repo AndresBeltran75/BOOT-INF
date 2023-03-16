@@ -1,65 +1,40 @@
 <build>
     <plugins>
-        <!-- Plugin para crear un JAR ejecutable -->
-        <plugin>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-maven-plugin</artifactId>
-            <version>2.6.3</version>
-            <executions>
-                <execution>
-                    <goals>
-                        <goal>repackage</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
-
-        <!-- Plugin para crear un JAR sin BOOT-INF -->
         <plugin>
             <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-dependency-plugin</artifactId>
-            <version>3.2.0</version>
+            <artifactId>maven-shade-plugin</artifactId>
+            <version>3.2.4</version>
+            <configuration>
+                <createDependencyReducedPom>false</createDependencyReducedPom>
+                <minimizeJar>true</minimizeJar>
+                <shadedArtifactAttached>true</shadedArtifactAttached>
+                <shadedClassifierName>shaded</shadedClassifierName>
+                <filters>
+                    <filter>
+                        <artifact>*:*</artifact>
+                        <excludes>
+                            <exclude>**/BOOT-INF/**</exclude>
+                        </excludes>
+                    </filter>
+                </filters>
+                <transformers>
+                    <transformer implementation="org.apache.maven.plugins.shade.resource.ServicesResourceTransformer"/>
+                </transformers>
+                <artifactSet>
+                    <includes>
+                        <include>${project.groupId}:${project.artifactId}</include>
+                    </includes>
+                </artifactSet>
+                <outputFile>${project.build.directory}/${project.artifactId}-${project.version}-shaded.jar</outputFile>
+                <finalName>${project.artifactId}-${project.version}-shaded</finalName>
+                <layout>NONE</layout>
+            </configuration>
             <executions>
                 <execution>
-                    <id>copy-dependencies</id>
                     <phase>package</phase>
                     <goals>
-                        <goal>copy-dependencies</goal>
+                        <goal>shade</goal>
                     </goals>
-                    <configuration>
-                        <includeScope>runtime</includeScope>
-                        <outputDirectory>${project.build.directory}/dependency-jars/</outputDirectory>
-                        <stripVersion>true</stripVersion>
-                        <excludeGroupIds>org.springframework.boot</excludeGroupIds>
-                    </configuration>
-                </execution>
-                <execution>
-                    <id>jar-without-boot-inf</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>jar</goal>
-                    </goals>
-                    <configuration>
-                        <finalName>${project.artifactId}-without-boot-inf</finalName>
-                        <classifier>without-boot-inf</classifier>
-                        <archive>
-                            <manifest>
-                                <mainClass>${start-class}</mainClass>
-                            </manifest>
-                        </archive>
-                        <includes>
-                            <include>**/*.*</include>
-                        </includes>
-                        <fileSets>
-                            <fileSet>
-                                <directory>${project.build.directory}/dependency-jars/</directory>
-                                <includes>
-                                    <include>**/*.jar</include>
-                                </includes>
-                                <outputDirectory>BOOT-INF/lib</outputDirectory>
-                            </fileSet>
-                        </fileSets>
-                    </configuration>
                 </execution>
             </executions>
         </plugin>
