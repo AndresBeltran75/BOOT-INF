@@ -52,3 +52,8 @@
 	</build>
 
 </project>
+
+
+---
+
+https://github.com/acoronadoc/java-springboot-hexagonal-architecture-sample
